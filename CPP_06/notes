@@ -1,0 +1,114 @@
+#include "ScalarConverter.hpp"
+
+void ScalarConverter::convert(const std::string& literal) {
+    char c;
+    int i;
+    float f;
+    double d;
+
+    // Try converting to double as the most general type
+    char* endPtr;
+    d = strtod(literal.c_str(), &endPtr);
+
+    // Check for special cases (pseudo-literals)
+    if (literal == "+inf" || literal == "inf" || literal == "-inf" || literal == "nan") {
+        f = static_cast<float>(d);
+        std::cout << "char: impossible" << std::endl;
+        std::cout << "int: impossible" << std::endl;
+        std::cout << "float: " << f << "f" << std::endl;
+        std::cout << "double: " << d << std::endl;
+        return;
+    } else if (literal == "+inff" || literal == "inff" || literal == "-inff" || literal == "nanf") {
+        f = static_cast<float>(d);
+        std::cout << "char: impossible" << std::endl;
+        std::cout << "int: impossible" << std::endl;
+        std::cout << "float: " << f << "f" << std::endl;
+        std::cout << "double: " << static_cast<double>(f) << std::endl;
+        return;
+    }
+
+    // If endPtr points to 'f', it's a float literal
+    bool isFloatLiteral = (*endPtr == 'f');
+
+    // Convert to int and float
+    i = static_cast<int>(d);
+    f = static_cast<float>(d);
+
+    // Handle char conversion
+    if (d >= std::numeric_limits<char>::min() && d <= std::numeric_limits<char>::max() && (i == d)) {
+        c = static_cast<char>(i);
+        if (std::isprint(c)) {
+            std::cout << "char: '" << c << "'" << std::endl;
+        } else {
+            std::cout << "char: Non displayable" << std::endl;
+        }
+    } else {
+        std::cout << "char: impossible" << std::endl;
+    }
+
+    // Handle int conversion
+    if (d >= std::numeric_limits<int>::min() && d <= std::numeric_limits<int>::max() && (*endPtr == '\0' || isFloatLiteral)) {
+        std::cout << "int: " << i << std::endl;
+    } else {
+        std::cout << "int: impossible" << std::endl;
+    }
+
+    // Handle float conversion
+    std::cout << "float: " << f;
+    if (f == static_cast<int>(f)) {
+        std::cout << ".0f" << std::endl;
+    } else {
+        std::cout << "f" << std::endl;
+    }
+
+    // Handle double conversion
+    std::cout << "double: " << d;
+    if (d == static_cast<int>(d)) {
+        std::cout << ".0" << std::endl;
+    } else {
+        std::cout << std::endl;
+    }
+}
+
+// Private constructor and destructor (non-instantiable)
+ScalarConverter::ScalarConverter() {}
+ScalarConverter::ScalarConverter(const ScalarConverter&) {}
+ScalarConverter& ScalarConverter::operator=(const ScalarConverter&) { return *this; }
+ScalarConverter::~ScalarConverter() {}
+
+
+void ScalarConverter::convert(const std::string& literal) {
+    if (isChar(literal)) {
+        // Conversion logic for char
+    } else if (isInt(literal)) {
+        // Conversion logic for int
+    } else if (isFloat(literal)) {
+        // Conversion logic for float
+    } else if (isDouble(literal)) {
+        // Conversion logic for double
+    } else {
+        std::cerr << "Error: Unknown type for conversion." << std::endl;
+    }
+}
+
+bool ScalarConverter::isChar(const std::string& literal) {
+    return literal.length() == 1 && isprint(literal[0]) && !isdigit(literal[0]);
+}
+
+bool ScalarConverter::isInt(const std::string& literal) {
+    char* end;
+    long value = strtol(literal.c_str(), &end, 10);
+    return *end == '\0' && value >= INT_MIN && value <= INT_MAX;
+}
+
+bool ScalarConverter::isFloat(const std::string& literal) {
+    // Check for 'f' at the end and valid float format
+    return literal.back() == 'f' && isFloatWithoutSuffix(literal.substr(0, literal.size() - 1));
+}
+
+bool ScalarConverter::isDouble(const std::string& literal) {
+    // Check valid double format
+    char* end;
+    strtod(literal.c_str(), &end);
+    return *end == '\0';
+}
